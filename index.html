@@ -1,413 +1,430 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
   <base target="_top">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --navy:#0B1829; --gold:#C9A84C; --bg:#F0F3F5; --white:#FFFFFF;
-      --border:#E1E8ED; --red:#B12A3B; --green:#28A745;
-      --muted:#6B7280;
-      --shadow: 0 6px 18px rgba(0,0,0,.08);
-      --radius:10px;
-      --rowh: 40px;
-      --hdrh: 46px;
+      --navy:#0B1829; --gold:#C9A84C; --bg:#F0F3F5; --white:#fff; --border:#E1E8ED;
+      --red:#B12A3B; --muted:#7B8794; --shadow:0 6px 20px rgba(0,0,0,.08);
+      --radius:14px;
     }
 
-    /* scaling for LINE */
-    body.is-line { zoom: 0.9; -moz-transform: scale(0.9); -moz-transform-origin: 0 0; }
+    body.is-line{ zoom:.92; -moz-transform:scale(.92); -moz-transform-origin:0 0; }
 
     *{box-sizing:border-box}
     body{
       font-family:'Montserrat','Sarabun',sans-serif;
       background:var(--bg);
-      margin:0;
-      padding:0;
+      margin:0; padding:0;
       color:var(--navy);
       overflow-x:hidden;
     }
 
-    /* ===== Header ===== */
+    /* Header */
     .header{
       background:var(--navy);
       color:var(--white);
-      padding:10px 12px;
-      text-align:center;
+      padding:12px 12px 10px;
+      position:sticky; top:0; z-index:100;
       border-bottom:3px solid var(--gold);
-      position:sticky; top:0; z-index:200;
-      box-shadow:0 2px 10px rgba(0,0,0,.14);
+      box-shadow:0 2px 8px rgba(0,0,0,.14);
     }
-    .header h1{
+    .header-top{
+      display:flex; align-items:center; justify-content:center; position:relative;
+    }
+    .title{
       margin:0;
-      font-size:14px;
-      letter-spacing:1px;
-      font-weight:800;
-      display:flex;align-items:center;justify-content:center;gap:8px;
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.12em;
+      display:flex; align-items:center; gap:10px;
+      text-transform:uppercase;
     }
-    .header .mini-actions{
-      position:absolute; right:10px; top:8px;
-      display:flex; gap:8px; align-items:center;
-    }
-    .iconbtn{
-      width:34px;height:34px;border-radius:10px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.08);
-      color:var(--white);
-      cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-      transition:.15s;
-    }
-    .iconbtn:active{transform:scale(.98)}
-    .iconbtn:hover{background:rgba(255,255,255,.12)}
-    .brand-dot{
-      width:8px;height:8px;border-radius:50%;
+    .dot{
+      width:10px; height:10px; border-radius:50%;
       background:var(--gold);
-      box-shadow:0 0 0 4px rgba(201,168,76,.18);
+      box-shadow:0 0 0 3px rgba(201,168,76,.18);
+      display:inline-block;
     }
-
-    /* ===== Search Panel ===== */
-    .search-panel{
-      background:var(--white);
-      padding:10px;
-      border-bottom:1px solid var(--border);
-      position:sticky; top:48px; z-index:180;
-    }
-    .input-box{
-      width:100%;
-      padding:10px;
-      border:1.5px solid var(--border);
+    .btn-refresh{
+      position:absolute; right:4px; top:50%; transform:translateY(-50%);
+      width:42px; height:34px;
       border-radius:10px;
-      font-size:14px;
-      outline:none;
-      margin-bottom:6px;
-      font-family:'Sarabun';
-      background:#fff;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px;
     }
-    .filter-grid{
+    .btn-refresh:active{ transform:translateY(-50%) scale(.98); }
+
+    /* Filters panel (NO SEARCH) */
+    .panel{
+      background:var(--white);
+      border-bottom:1px solid var(--border);
+      padding:10px 10px 10px;
+    }
+    .grid{
       display:grid;
-      grid-template-columns: 1.2fr .8fr .8fr;
-      gap:6px;
-      margin-bottom:6px;
+      grid-template-columns: 1fr 1fr;
+      gap:8px;
+    }
+    .field{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    label{
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.10em;
+      color:#667085;
+      text-transform:uppercase;
     }
     select{
-      padding:10px;
-      border-radius:10px;
+      width:100%;
+      padding:11px 12px;
       border:1.5px solid var(--border);
-      font-family:'Sarabun';
-      font-size:13px;
+      border-radius:12px;
       outline:none;
+      font-family:'Sarabun';
+      font-size:14px;
       background:#fff;
     }
 
+    /* Pills type */
     .pill-box{
-      display:flex; gap:6px; overflow-x:auto;
-      padding:2px 0 6px;
+      display:flex; gap:6px;
+      overflow-x:auto;
+      padding:10px 0 2px;
       scrollbar-width:none;
     }
-    .pill-box::-webkit-scrollbar{display:none}
+    .pill-box::-webkit-scrollbar{ display:none; }
     .pill{
       white-space:nowrap;
-      padding:6px 12px;
+      padding:7px 12px;
       border-radius:999px;
       background:#E9EEF3;
-      font-size:10px;
-      font-weight:800;
-      color:#475569;
+      font-size:11px;
+      font-weight:900;
+      color:#475467;
       cursor:pointer;
       border:none;
-      letter-spacing:.4px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
     }
     .pill.active{
-      background:linear-gradient(135deg,var(--gold),#e7cc7a);
+      background:var(--gold);
       color:#0B1829;
     }
 
-    /* ===== Workspace ===== */
-    .wrap{
-      padding:8px 8px 110px;
-    }
-
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:8px;
-      margin:6px 2px 10px;
-    }
-    .statline{
+    /* Meta row */
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:10px 10px 0;
+      color:#667085;
+      font-weight:800;
       font-size:11px;
-      color:var(--muted);
-      font-weight:700;
-      letter-spacing:.3px;
     }
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:6px 10px;
-      border-radius:999px;
+    .gas-pill{
+      display:inline-flex; align-items:center; gap:8px;
       background:#fff;
       border:1px solid var(--border);
-      box-shadow:0 2px 8px rgba(0,0,0,.04);
-      font-size:11px;
-      font-weight:800;
-      color:#334155;
+      border-radius:999px;
+      padding:8px 10px;
+      box-shadow:0 2px 10px rgba(0,0,0,.05);
       white-space:nowrap;
     }
-    .badge .dot{
-      width:8px;height:8px;border-radius:50%;
-      background:#94a3b8;
+    .gas-dot{
+      width:10px; height:10px; border-radius:50%;
+      background:#D92D20;
+      box-shadow:0 0 0 3px rgba(217,45,32,.15);
     }
-    .badge.ok .dot{background:var(--green)}
-    .badge.warn .dot{background:var(--red)}
 
-    /* ===== Excel-like Grid ===== */
-    .sheet{
-      background:#fff;
+    /* List */
+    .list{
+      padding:10px 10px 110px;
+    }
+    .card{
+      background:var(--white);
       border:1px solid var(--border);
       border-radius:var(--radius);
-      box-shadow:var(--shadow);
+      box-shadow:0 1px 10px rgba(0,0,0,.04);
+      display:flex;
+      gap:10px;
+      padding:10px;
+      margin-bottom:8px;
       overflow:hidden;
     }
-
-    .sheet-scroll{
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-      max-height: calc(100dvh - 250px);
+    .thumb{
+      width:92px;
+      height:68px;
+      border-radius:12px;
+      background:#0B1829;
+      flex:0 0 92px;
+      overflow:hidden;
+      position:relative;
     }
-
-    table{
-      border-collapse:separate;
-      border-spacing:0;
-      width:100%;
-      min-width: 980px; /* ให้เหมือน excel และเลื่อนได้บนมือถือ */
+    .thumb img{
+      width:100%; height:100%;
+      object-fit:cover; display:block;
+      filter:saturate(1.05) contrast(1.02);
+    }
+    .thumb::after{
+      content:'';
+      position:absolute; inset:0;
+      background:linear-gradient(90deg, rgba(11,24,41,.08), rgba(11,24,41,.38));
+      pointer-events:none;
+    }
+    .col{
+      flex:1;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding-top:1px;
+    }
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .zone{
+      font-size:14px;
+      font-weight:900;
+      color:var(--navy);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .price{
+      font-size:16px;
+      font-weight:900;
+      color:var(--red);
+      white-space:nowrap;
+      letter-spacing:.02em;
+    }
+    .sub{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
       font-family:'Sarabun';
-    }
-
-    thead th{
-      position:sticky; top:0; z-index:5;
-      height:var(--hdrh);
-      background:linear-gradient(180deg,#0B1829,#0a1626);
-      color:#fff;
-      font-weight:800;
-      font-size:11px;
-      letter-spacing:.6px;
-      text-transform:uppercase;
-      border-bottom:1px solid rgba(255,255,255,.12);
-      padding:10px 10px;
-      white-space:nowrap;
-    }
-    thead th:first-child{border-top-left-radius:0}
-    thead th:last-child{border-top-right-radius:0}
-
-    tbody td{
-      height:var(--rowh);
-      border-bottom:1px solid #eef2f7;
-      padding:6px 10px;
+      color:#667085;
       font-size:12px;
-      color:#0f172a;
-      background:#fff;
-      vertical-align:middle;
-      white-space:nowrap;
+      font-weight:700;
     }
-    tbody tr:nth-child(even) td{background:#fbfdff}
-    tbody tr:hover td{background:#f6fbff}
-
-    .cell-muted{color:#64748b}
-    .cell-id{
-      font-weight:800;
-      color:#8a6a12;
-      letter-spacing:.5px;
-      font-family:'Montserrat';
-      font-size:11px;
-    }
-
-    /* Editable cells */
-    .celledit{
-      width:100%;
-      border:1px solid transparent;
-      border-radius:8px;
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#F6F8FB;
+      border:1px solid #EEF2F6;
       padding:6px 8px;
+      border-radius:10px;
       font-size:12px;
-      outline:none;
-      background:transparent;
-      transition:.12s;
+      font-weight:800;
+      color:#344054;
+    }
+    .note{
       font-family:'Sarabun';
-      min-width: 60px;
+      color:#98A2B3;
+      font-size:11px;
+      font-weight:600;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .celledit:focus{
-      background:#fff;
-      border-color:rgba(201,168,76,.55);
-      box-shadow:0 0 0 3px rgba(201,168,76,.18);
-    }
-    .celledit.num{ text-align:right; font-family:'Montserrat'; font-weight:800; }
-    .price-hero{ color:var(--red); }
 
-    /* Step toggles */
-    .steps{
-      display:flex; gap:6px; align-items:center;
+    /* Workflow */
+    .workflow{
+      display:flex; gap:7px; margin-top:2px;
     }
-    .stepbtn{
-      width:32px; height:30px;
-      border-radius:8px;
-      border:1px solid #e6edf4;
-      background:#f8fafc;
+    .step{
+      width:30px; height:30px;
+      border-radius:10px;
       display:flex; flex-direction:column;
       align-items:center; justify-content:center;
+      font-size:12px;
+      background:#F8FAFC;
+      border:1px solid #EEF2F6;
       cursor:pointer;
-      transition:.12s;
+      transition:.15s;
       user-select:none;
     }
-    .stepbtn:active{transform:scale(.98)}
-    .stepbtn .lbl{
-      font-size:8px;
+    .step:active{ transform:scale(.98); }
+    .lbl{
+      font-size:6px;
       font-weight:900;
-      color:#94a3b8;
-      letter-spacing:.5px;
+      color:#98A2B3;
+      letter-spacing:.10em;
       text-transform:uppercase;
       margin-top:1px;
-      font-family:'Montserrat';
     }
-    .stepbtn.done{
-      border-color: rgba(40,167,69,.5);
-      background:#eaf7ee;
-      color:var(--green);
-    }
-    .stepbtn.done .lbl{color:rgba(40,167,69,.9)}
-    .stepbtn.pending{
-      color:#cbd5e1;
+    .done{
+      border-color:#2ECA8B;
+      background:#E9F9F0;
+      color:#2ECA8B;
     }
 
-    /* Link button */
-    .linkbtn{
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid #e6edf4;
-      background:#fff;
-      font-weight:800;
-      font-size:11px;
-      cursor:pointer;
-      display:inline-flex;align-items:center;gap:6px;
-      color:#0B1829;
-      transition:.12s;
-    }
-    .linkbtn:hover{background:#f8fafc}
-    .linkbtn .mini{color:#64748b;font-weight:900}
-
-    /* Status pill (optional text) */
-    .typepill{
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid #e6edf4;
-      background:#fff;
-      font-weight:900;
-      font-size:11px;
-      letter-spacing:.5px;
-      font-family:'Montserrat';
-      color:#334155;
-    }
-
-    /* ===== Loading / Empty ===== */
-    #loading{
-      text-align:center;
-      padding:26px 10px;
-      color:#94a3b8;
-      font-weight:900;
-      font-size:12px;
-      letter-spacing:.6px;
-    }
-    .empty{
-      padding:28px;
-      text-align:center;
-      color:#94a3b8;
-      font-weight:900;
-    }
-
-    /* ===== FAB & Modal ===== */
+    /* FAB + Modal */
     .fab{
       position:fixed;
-      bottom:18px; right:18px;
-      width:56px; height:56px;
-      background:linear-gradient(135deg,var(--gold),#e7cc7a);
-      color:#0B1829;
-      border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-size:30px;
-      box-shadow:0 10px 26px rgba(0,0,0,.28);
+      bottom:22px; right:22px;
+      width:64px; height:64px;
+      background:var(--gold);
       border:none;
-      z-index:250;
-      cursor:pointer;
+      border-radius:50%;
+      color:#0B1829;
+      font-size:32px;
       font-weight:900;
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
+      cursor:pointer;
+      z-index:999;
     }
     #modal{
       display:none;
-      position:fixed; inset:0;
-      background:rgba(0,0,0,0.78);
-      z-index:1000;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.75);
+      z-index:2000;
       padding:14px;
     }
     .modal-box{
       background:#fff;
+      border-radius:16px;
+      max-width:520px;
+      margin: auto;
       padding:16px;
-      border-radius:14px;
-      max-width:480px;
-      margin: 12px auto;
-      box-shadow:0 20px 60px rgba(0,0,0,.45);
+    }
+    .modal-title{
+      margin:0 0 10px;
+      font-size:16px;
+      font-weight:1000;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#0B1829;
+    }
+    .input, textarea{
+      width:100%;
+      padding:12px;
+      border:1.5px solid var(--border);
+      border-radius:12px;
+      outline:none;
+      font-family:'Sarabun';
+      font-size:14px;
+      margin-bottom:8px;
+    }
+    .row2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
     }
     .btn-save{
-      background:linear-gradient(135deg,var(--gold),#e7cc7a);
-      color:#0B1829;
-      border:none;
-      padding:14px;
-      border-radius:12px;
-      font-weight:900;
       width:100%;
-      margin-top:10px;
-      font-size:15px;
+      padding:14px;
+      background:var(--navy);
+      color:#fff;
+      border:none;
+      border-radius:12px;
+      font-weight:1000;
+      letter-spacing:.08em;
+      cursor:pointer;
+    }
+    .btn-cancel{
+      width:100%;
+      padding:12px;
+      background:transparent;
+      border:none;
+      color:#98A2B3;
+      font-weight:900;
+      margin-top:8px;
       cursor:pointer;
     }
 
-    /* ===== Mobile tuning ===== */
-    @media (max-width:520px){
-      .filter-grid{grid-template-columns: 1fr 1fr; }
-      .filter-grid .bedsbox{grid-column:1 / -1;}
-      .search-panel{top:48px}
-      .sheet-scroll{max-height: calc(100dvh - 270px);}
-      .header h1{font-size:13px}
+    /* Loading */
+    #loading{
+      text-align:center;
+      padding:24px;
+      color:#98A2B3;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.12em;
+    }
+    .empty{
+      text-align:center;
+      padding:40px 10px;
+      color:#98A2B3;
+      font-weight:900;
     }
   </style>
 </head>
 
 <body>
+
   <div class="header">
-    <div class="mini-actions">
-      <button class="iconbtn" title="Reload" onclick="location.reload()">↻</button>
+    <div class="header-top">
+      <h1 class="title"><span class="dot"></span>SMART MATCH PRO</h1>
+      <button class="btn-refresh" onclick="reloadData()" title="Refresh">↻</button>
     </div>
-    <h1><span class="brand-dot"></span> SMART MATCH PRO</h1>
   </div>
 
-  <div class="search-panel">
-    <input type="text" id="qSearch" class="input-box" placeholder="Search (Zone, ID, Notes, URL...)" oninput="filterData()">
+  <!-- ✅ NO SEARCH — ใช้คลิก Filter อย่างเดียว -->
+  <div class="panel">
+    <div class="grid">
+      <div class="field">
+        <label>Sort Price</label>
+        <select id="sortPrice" onchange="applyFilters()">
+          <option value="">None</option>
+          <option value="low">Low → High</option>
+          <option value="high">High → Low</option>
+        </select>
+      </div>
 
-    <div class="filter-grid">
-      <select id="sortPrice" onchange="filterData()">
-        <option value="">Sort Price</option>
-        <option value="low">Price: Low to High</option>
-        <option value="high">Price: High to Low</option>
-      </select>
+      <div class="field">
+        <label>Zone</label>
+        <select id="selZone" onchange="applyFilters()">
+          <option value="">All Zones</option>
+        </select>
+      </div>
 
-      <select id="typeFilter" onchange="filterData()">
-        <option value="">Type: All</option>
-        <option value="House">House</option>
-        <option value="Condo">Condo</option>
-        <option value="Pool Villa">Pool Villa</option>
-        <option value="Land">Land</option>
-        <option value="Commercial">Commercial</option>
-        <option value="Others">Others</option>
-      </select>
+      <div class="field">
+        <label>Beds</label>
+        <select id="selBeds" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5+</option>
+        </select>
+      </div>
 
-      <input type="number" id="bedSearch" class="input-box bedsbox" placeholder="Beds (exact)" oninput="filterData()" style="margin:0;">
+      <div class="field">
+        <label>Land Area</label>
+        <select id="selLand" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="0-300">≤ 300</option>
+          <option value="300-600">300–600</option>
+          <option value="600-1000">600–1000</option>
+          <option value="1000-999999">≥ 1000</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column:1 / -1;">
+        <label>Price Range (Million THB)</label>
+        <select id="selPrice" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="0-5">≤ 5M</option>
+          <option value="5-10">5–10M</option>
+          <option value="10-20">10–20M</option>
+          <option value="20-999999">≥ 20M</option>
+        </select>
+      </div>
     </div>
 
     <div class="pill-box" id="pillBox">
@@ -421,49 +438,40 @@
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="topbar">
-      <div class="statline" id="statLine">—</div>
-      <div class="badge" id="connBadge"><span class="dot"></span><span id="connText">Checking…</span></div>
+  <div class="meta">
+    <div>
+      <span id="metaCount">Records: 0</span> • <span id="metaType">Type: ALL</span><br>
+      <span id="metaUpdated">Updated: —</span>
     </div>
-
-    <div id="loading">SYNCHRONIZING DATABASE...</div>
-
-    <div class="sheet" id="sheet" style="display:none;">
-      <div class="sheet-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:110px;">ID</th>
-              <th style="width:120px;">TYPE</th>
-              <th style="width:170px;">ZONE</th>
-              <th style="width:140px;text-align:right;">PRICE</th>
-              <th style="width:90px;text-align:right;">BEDS</th>
-              <th style="width:320px;">NOTES</th>
-              <th style="width:160px;">WORKFLOW</th>
-              <th style="width:120px;">SOURCE</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
+    <div class="gas-pill">
+      <span class="gas-dot"></span>
+      <span>No GAS (Open via Web App)</span>
     </div>
-
-    <div class="empty" id="empty" style="display:none;">NO RESULTS</div>
   </div>
+
+  <div id="loading">SYNCHRONIZING DATABASE...</div>
+  <div class="list" id="list"></div>
 
   <!-- Modal -->
   <div id="modal">
     <div class="modal-box">
-      <h2 style="margin:0 0 12px; font-size:16px; letter-spacing:.6px;">ADD NEW RECORD</h2>
+      <h2 class="modal-title">Add New Record</h2>
+
       <form id="addForm">
-        <input type="url" name="Source_URL" placeholder="Listing URL (https://...)" required class="input-box">
-        <div style="display:flex; gap:6px;">
-          <input type="number" name="Price" placeholder="Price" required class="input-box" style="margin-bottom:6px;">
-          <input type="number" name="Bedrooms" placeholder="Beds" required class="input-box" style="margin-bottom:6px;">
+        <input class="input" type="url" name="Thumb_URL" placeholder="Thumbnail URL (ภาพบ้านเล็กๆ) — https://..." required>
+        <input class="input" type="url" name="Source_URL" placeholder="Source URL (optional) — https://...">
+
+        <div class="row2">
+          <input class="input" type="number" name="Price" placeholder="Price (บาท) เช่น 6900000" required>
+          <input class="input" type="number" name="Bedrooms" placeholder="Beds" required>
         </div>
-        <input type="text" name="Zone" placeholder="Zone (e.g. Bor Fai)" required class="input-box">
-        <select name="Type" class="input-box" style="margin-bottom:8px;">
+
+        <div class="row2">
+          <input class="input" type="number" name="Land_Area" placeholder="Land Area (ตัวเลข) เช่น 320" required>
+          <input class="input" type="text" name="Zone" placeholder="Zone เช่น หัวหิน / บ่อฝ้าย" required>
+        </div>
+
+        <select class="input" name="Type" required>
           <option value="House">House</option>
           <option value="Condo">Condo</option>
           <option value="Pool Villa">Pool Villa</option>
@@ -471,10 +479,11 @@
           <option value="Commercial">Commercial</option>
           <option value="Others">Others</option>
         </select>
-        <textarea name="Notes" placeholder="Internal Notes..." class="input-box" rows="2"></textarea>
 
-        <button type="submit" class="btn-save" id="saveBtn">SAVE TO DATABASE</button>
-        <button type="button" onclick="toggleModal()" style="background:none; border:none; color:#94a3b8; width:100%; margin-top:10px; font-weight:900; cursor:pointer;">CANCEL</button>
+        <textarea class="input" name="Notes" rows="2" placeholder="Internal Notes (optional)"></textarea>
+
+        <button class="btn-save" type="submit" id="saveBtn">SAVE</button>
+        <button class="btn-cancel" type="button" onclick="toggleModal()">CANCEL</button>
       </form>
     </div>
   </div>
@@ -483,331 +492,219 @@
 
   <script>
     let masterData = [];
-    let activePill = "all";
-
-    // ---- GAS availability check (สำคัญ: ถ้าเปิดจาก GitHub จะไม่มี google.script.run) ----
-    function hasGAS() {
-      return (typeof google !== "undefined" && google.script && google.script.run);
-    }
+    let activeType = "all";
 
     window.onload = () => {
       const ua = navigator.userAgent || navigator.vendor || window.opera;
-      if (ua.indexOf("Line") > -1) document.body.classList.add('is-line');
-
-      // connection badge
-      const badge = document.getElementById("connBadge");
-      const text  = document.getElementById("connText");
-
-      if (hasGAS()) {
-        badge.classList.add("ok");
-        text.textContent = "Connected (GAS)";
-        fetchData();
-      } else {
-        badge.classList.add("warn");
-        text.textContent = "No GAS (Open via Web App)";
-        // โหมด fallback: โหลดจาก localStorage เพื่อ “ใช้งานส่วนตัว” ได้ แม้ไม่ผ่าน GAS
-        masterData = loadLocal();
-        document.getElementById('loading').style.display = 'none';
-        render(masterData);
-      }
+      if (ua.indexOf("Line") > -1) document.body.classList.add("is-line");
+      reloadData();
     };
 
-    // ===== Local fallback (optional) =====
-    function loadLocal() {
-      try {
-        const raw = localStorage.getItem("SMP_LOCAL");
-        if (!raw) return [];
-        const arr = JSON.parse(raw);
-        return Array.isArray(arr) ? arr : [];
-      } catch(e){ return []; }
-    }
-    function saveLocal() {
-      try { localStorage.setItem("SMP_LOCAL", JSON.stringify(masterData)); } catch(e){}
-    }
-
-    // ===== Fetch =====
-    function fetchData() {
+    function reloadData(){
       document.getElementById('loading').style.display = 'block';
-      document.getElementById('sheet').style.display = 'none';
-      document.getElementById('empty').style.display = 'none';
-
-      google.script.run
-        .withSuccessHandler(data => {
-          if (data && data.error) { alert(data.error); return; }
-          masterData = Array.isArray(data) ? data : [];
-          document.getElementById('loading').style.display = 'none';
-          render(masterData);
-        })
-        .withFailureHandler(err => {
-          document.getElementById('loading').style.display = 'none';
-          alert("GAS Error: " + (err && err.message ? err.message : err));
-        })
-        .getSmartData();
+      document.getElementById('list').innerHTML = '';
+      google.script.run.withSuccessHandler(data => {
+        if (data && data.error) { alert(data.error); return; }
+        masterData = Array.isArray(data) ? data : [];
+        document.getElementById('loading').style.display = 'none';
+        buildZoneOptions();
+        applyFilters();
+        stampMeta();
+      }).getSmartData();
     }
 
-    // ===== Render (Excel-like) =====
-    function render(items) {
-      const sheet = document.getElementById('sheet');
-      const empty = document.getElementById('empty');
-      const tbody = document.getElementById('tbody');
+    function stampMeta(){
+      const d = new Date();
+      const th = d.toLocaleString('th-TH');
+      document.getElementById('metaUpdated').textContent = `Updated: ${th}`;
+    }
 
-      // stat
-      document.getElementById("statLine").textContent =
-        `Records: ${items.length}  •  Type: ${activePill.toUpperCase()}  •  Updated: ${new Date().toLocaleString()}`;
+    function buildZoneOptions(){
+      const sel = document.getElementById('selZone');
+      const prev = sel.value;
+      const zones = [...new Set(masterData.map(x => String(x.Zone||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+      sel.innerHTML = `<option value="">All Zones</option>` + zones.map(z => `<option value="${escapeHtml(z)}">${escapeHtml(z)}</option>`).join('');
+      if (zones.includes(prev)) sel.value = prev;
+    }
 
-      if (!items || items.length === 0) {
-        sheet.style.display = 'none';
-        empty.style.display = 'block';
-        tbody.innerHTML = '';
+    function applyFilters(){
+      const sort = document.getElementById('sortPrice').value;
+      const zone = document.getElementById('selZone').value.trim();
+      const beds = document.getElementById('selBeds').value;
+      const land = document.getElementById('selLand').value;
+      const pr   = document.getElementById('selPrice').value;
+
+      let items = masterData.slice();
+
+      // type pill
+      if (activeType !== 'all') {
+        items = items.filter(x => String(x.Type||'').trim() === activeType);
+      }
+
+      // zone
+      if (zone) {
+        items = items.filter(x => String(x.Zone||'').trim() === zone);
+      }
+
+      // beds exact / 5+
+      if (beds) {
+        const b = Number(beds);
+        items = items.filter(x => {
+          const v = Number(x.Bedrooms||0);
+          return (beds === '5') ? (v >= 5) : (v === b);
+        });
+      }
+
+      // land range
+      if (land) {
+        const [mn, mx] = land.split('-').map(Number);
+        items = items.filter(x => {
+          const v = Number(x.Land_Area||0);
+          return v >= mn && v <= mx;
+        });
+      }
+
+      // price range (ล้าน)
+      if (pr) {
+        const [mn, mx] = pr.split('-').map(Number);
+        items = items.filter(x => {
+          const v = Number(x.Price||0) / 1e6;
+          return v >= mn && v <= mx;
+        });
+      }
+
+      // sort
+      if (sort === 'low') items.sort((a,b) => Number(a.Price||0) - Number(b.Price||0));
+      if (sort === 'high') items.sort((a,b) => Number(b.Price||0) - Number(a.Price||0));
+
+      render(items);
+
+      document.getElementById('metaCount').textContent = `Records: ${items.length}`;
+      document.getElementById('metaType').textContent = `Type: ${activeType.toUpperCase()}`;
+    }
+
+    function render(items){
+      const el = document.getElementById('list');
+      if (!items.length){
+        el.innerHTML = `<div class="empty">NO RESULTS</div>`;
         return;
       }
 
-      empty.style.display = 'none';
-      sheet.style.display = 'block';
-
-      tbody.innerHTML = items.map(item => rowHtml(item)).join('');
-      attachRowEvents();
+      el.innerHTML = items.map(x => cardHtml(x)).join('');
     }
 
-    function rowHtml(item){
-      const id    = item.ID ?? '';
-      const type  = item.Type ?? '';
-      const zone  = item.Zone ?? '';
-      const beds  = item.Bedrooms ?? '';
-      const notes = item.Notes ?? '';
-      const price = Number(item.Price || 0);
+    function cardHtml(x){
+      const thumb = String(x.Thumb_URL||'').trim();
+      const zone  = String(x.Zone||'-').trim() || '-';
+      const beds  = Number(x.Bedrooms||0) || 0;
+      const land  = Number(x.Land_Area||0) || 0;
+      const price = Number(x.Price||0) || 0;
+      const type  = String(x.Type||'').trim() || '-';
+      const note  = String(x.Notes||'').trim();
+      const url   = String(x.Source_URL||'').trim();
+      const row   = Number(x._row);
 
-      const url   = (item.Source_URL || '').replace(/"/g,'&quot;');
+      const pPrettyM = price ? (price/1e6).toFixed(1) + "M" : "—";
+      const landTxt = land ? `${land} area` : `— area`; // คุณจะเปลี่ยนเป็น "sqm" หรือ "sq.w" ได้ตามที่คุณใช้จริง
+
+      const imgHtml = thumb
+        ? `<img src="${escapeAttr(thumb)}" alt="thumb" loading="lazy" decoding="async" onerror="this.style.display='none'">`
+        : ``;
 
       return `
-        <tr data-row="${item._row ?? ''}" data-id="${String(id).replace(/"/g,'&quot;')}">
-          <td><span class="cell-id">#${id}</span></td>
+        <div class="card" onclick="${url ? `openLink('${escapeAttr(url)}')` : ''}">
+          <div class="thumb">${imgHtml}</div>
 
-          <td>
-            <select class="celledit" data-field="Type" style="padding:6px 8px;">
-              ${opt(type,'House')}
-              ${opt(type,'Condo')}
-              ${opt(type,'Pool Villa')}
-              ${opt(type,'Land')}
-              ${opt(type,'Commercial')}
-              ${opt(type,'Others')}
-            </select>
-          </td>
-
-          <td><input class="celledit" data-field="Zone" value="${escapeAttr(zone)}" /></td>
-
-          <td style="text-align:right;">
-            <input class="celledit num price-hero" data-field="Price" inputmode="numeric" value="${price ? price : ''}" />
-          </td>
-
-          <td style="text-align:right;">
-            <input class="celledit num" data-field="Bedrooms" inputmode="numeric" value="${escapeAttr(beds)}" />
-          </td>
-
-          <td>
-            <input class="celledit" data-field="Notes" value="${escapeAttr(notes)}" />
-          </td>
-
-          <td>
-            <div class="steps">
-              <div class="stepbtn ${isDone(item.Step1_Talk)}" data-step="Step1_Talk" title="Talk"><div>✔</div><div class="lbl">Talk</div></div>
-              <div class="stepbtn ${isDone(item.Step2_Survey)}" data-step="Step2_Survey" title="Survey"><div>📸</div><div class="lbl">Survey</div></div>
-              <div class="stepbtn ${isDone(item.Step3_Post)}" data-step="Step3_Post" title="Post"><div>🌐</div><div class="lbl">Post</div></div>
-              <div class="stepbtn ${isDone(item.Step4_Other)}" data-step="Step4_Other" title="Done"><div>🏆</div><div class="lbl">Done</div></div>
+          <div class="col">
+            <div class="top">
+              <div class="zone">${escapeHtml(zone)}</div>
+              <div class="price">฿${pPrettyM}</div>
             </div>
-          </td>
 
-          <td>
-            <button class="linkbtn" data-url="${url}">Open <span class="mini">↗</span></button>
-          </td>
-        </tr>
+            <div class="sub">
+              <span class="chip">🛏 ${beds || '—'} Beds</span>
+              <span class="chip">📐 ${escapeHtml(landTxt)}</span>
+              <span class="chip">🏷 ${escapeHtml(type)}</span>
+            </div>
+
+            <div class="note">${escapeHtml(note || '—')}</div>
+
+            <div class="workflow" onclick="event.stopPropagation()">
+              ${stepBtn(row,'Step1_Talk','✔','Talk', x.Step1_Talk)}
+              ${stepBtn(row,'Step2_Survey','📸','Survey', x.Step2_Survey)}
+              ${stepBtn(row,'Step3_Post','🌐','Post', x.Step3_Post)}
+              ${stepBtn(row,'Step4_Other','🏆','Done', x.Step4_Other)}
+            </div>
+          </div>
+        </div>
       `;
     }
 
-    function opt(current, val){
-      const sel = String(current).trim() === val ? 'selected' : '';
-      return `<option value="${val}" ${sel}>${val}</option>`;
+    function stepBtn(row, col, icon, label, val){
+      const done = String(val||'').trim().toLowerCase() === 'done';
+      return `
+        <div class="step ${done ? 'done' : ''}" onclick="toggleStep(${row}, '${col}')">
+          <div>${icon}</div>
+          <div class="lbl">${label}</div>
+        </div>
+      `;
     }
 
-    function escapeAttr(s){
-      return String(s ?? '')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;');
+    function toggleStep(row, col){
+      google.script.run.withSuccessHandler(res => {
+        if(res && res.ok) reloadData();
+      }).toggleStep(row, col);
     }
 
-    function isDone(v) {
-      return (String(v).toLowerCase().trim() === 'done') ? 'done' : 'pending';
+    function openLink(url){
+      try { window.open(url, '_blank'); } catch(e) {}
     }
 
-    // ===== Events (Inline Edit + Steps) =====
-    function attachRowEvents(){
-      // open url
-      document.querySelectorAll('.linkbtn').forEach(btn=>{
-        btn.onclick = (e)=>{
-          e.preventDefault();
-          const url = btn.getAttribute('data-url') || '';
-          if(url) window.open(url, '_blank');
-        };
-      });
-
-      // inline edits -> save
-      document.querySelectorAll('.celledit').forEach(inp=>{
-        inp.addEventListener('change', (e)=>{
-          const tr = e.target.closest('tr');
-          const row = tr ? tr.getAttribute('data-row') : '';
-          const field = e.target.getAttribute('data-field');
-          let value = e.target.value;
-
-          // normalize numeric
-          if(field === 'Price' || field === 'Bedrooms'){
-            value = String(value || '').replace(/[^\d]/g,'');
-          }
-
-          // update local masterData (ทันที)
-          const id = tr.getAttribute('data-id');
-          const idx = masterData.findIndex(x => String(x.ID) === String(id));
-          if(idx >= 0){
-            masterData[idx][field] = value;
-            saveLocal(); // fallback
-          }
-
-          // ถ้ามี GAS ให้ยิงไปบันทึกในชีตด้วย (ต้องมีฟังก์ชัน updateField ใน Apps Script)
-          if(hasGAS()){
-            google.script.run
-              .withSuccessHandler(()=>{})
-              .withFailureHandler(err=>console.warn('updateField failed:', err))
-              .updateField(Number(row), field, value);
-          }
-        });
-      });
-
-      // steps toggle
-      document.querySelectorAll('.stepbtn').forEach(btn=>{
-        btn.onclick = (e)=>{
-          const tr = e.target.closest('tr');
-          const row = tr ? tr.getAttribute('data-row') : '';
-          const col = btn.getAttribute('data-step');
-
-          // local toggle first
-          const id = tr.getAttribute('data-id');
-          const idx = masterData.findIndex(x => String(x.ID) === String(id));
-          if(idx >= 0){
-            const cur = String(masterData[idx][col]||'').toLowerCase().trim();
-            masterData[idx][col] = (cur === 'done') ? '' : 'done';
-            saveLocal();
-          }
-
-          // UI toggle
-          btn.classList.toggle('done');
-          btn.classList.toggle('pending');
-
-          // GAS toggle
-          if(hasGAS()){
-            google.script.run
-              .withSuccessHandler(res => { if(res && res.ok) fetchData(); })
-              .withFailureHandler(err => console.warn('toggleStep failed:', err))
-              .toggleStep(Number(row), col);
-          }
-        };
-      });
-    }
-
-    // ===== Filter / Sort =====
-    function filterData() {
-      const q = document.getElementById('qSearch').value.toLowerCase();
-      const sort = document.getElementById('sortPrice').value;
-      const beds = document.getElementById('bedSearch').value;
-      const typeDropdown = document.getElementById('typeFilter').value;
-
-      let filtered = masterData.filter(p => {
-        const text = `${p.Zone} ${p.ID} ${p.Notes} ${p.Type} ${p.Source_URL}`.toLowerCase();
-        const textMatch = text.includes(q);
-        const bedMatch = beds === "" || String(p.Bedrooms) === String(beds);
-
-        const pillMatch = (activePill === "all" || String(p.Type).trim() === activePill);
-        const ddMatch = (typeDropdown === "" || String(p.Type).trim() === typeDropdown);
-
-        return textMatch && bedMatch && pillMatch && ddMatch;
-      });
-
-      if (sort === "low") filtered.sort((a, b) => Number(a.Price||0) - Number(b.Price||0));
-      if (sort === "high") filtered.sort((a, b) => Number(b.Price||0) - Number(a.Price||0));
-
-      render(filtered);
-    }
-
-    // ===== Modal =====
-    function toggleModal() {
+    function toggleModal(){
       const m = document.getElementById('modal');
       m.style.display = (m.style.display === 'block') ? 'none' : 'block';
     }
 
     document.getElementById('addForm').onsubmit = (e) => {
       e.preventDefault();
-      const saveBtn = document.getElementById('saveBtn');
-      saveBtn.textContent = "SAVING...";
+      const btn = document.getElementById('saveBtn');
+      btn.textContent = 'SAVING...';
+      btn.disabled = true;
 
       const fd = Object.fromEntries(new FormData(e.target));
+      google.script.run.withSuccessHandler(res => {
+        btn.textContent = 'SAVE';
+        btn.disabled = false;
 
-      // local fallback add (ถ้าไม่ผ่าน GAS)
-      if(!hasGAS()){
-        const newId = "TMP-" + String(Date.now()).slice(-6);
-        masterData.unshift({
-          ID:newId,
-          Type:fd.Type,
-          Zone:fd.Zone,
-          Price:Number(fd.Price||0),
-          Bedrooms:Number(fd.Bedrooms||0),
-          Notes:fd.Notes||'',
-          Source_URL:fd.Source_URL||'',
-          Step1_Talk:'',Step2_Survey:'',Step3_Post:'',Step4_Other:'',
-          _row: '' // ไม่มีใน local
-        });
-        saveLocal();
-        toggleModal();
-        e.target.reset();
-        saveBtn.textContent = "SAVE TO DATABASE";
-        filterData();
-        return;
-      }
-
-      // GAS save
-      google.script.run
-        .withSuccessHandler(res => {
-          if(res && res.ok){
-            toggleModal();
-            e.target.reset();
-            saveBtn.textContent = "SAVE TO DATABASE";
-            fetchData();
-          }else{
-            saveBtn.textContent = "SAVE TO DATABASE";
-            alert("Save failed");
-          }
-        })
-        .withFailureHandler(err=>{
-          saveBtn.textContent = "SAVE TO DATABASE";
-          alert("GAS Error: " + (err && err.message ? err.message : err));
-        })
-        .saveNewListing(fd);
+        if(res && res.ok){
+          toggleModal();
+          e.target.reset();
+          reloadData();
+        } else {
+          alert(res?.error || 'Save failed');
+        }
+      }).saveNewListing(fd);
     };
 
-    // ===== Pills =====
     document.getElementById('pillBox').addEventListener('click', (e) => {
-      if (e.target.classList.contains('pill')) {
-        document.querySelectorAll('.pill').forEach(el => el.classList.remove('active'));
-        e.target.classList.add('active');
-        activePill = e.target.dataset.f;
-        filterData();
-      }
+      const btn = e.target.closest('.pill');
+      if(!btn) return;
+      document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      activeType = btn.dataset.f;
+      applyFilters();
     });
 
-    // ===== NOTE (สำคัญ) =====
-    // ถ้าคุณใช้หน้านี้กับ Google Apps Script จริง:
-    // - ต้องมีฟังก์ชัน getSmartData(), saveNewListing(fd), toggleStep(row,col)
-    // - และ "เพิ่ม" ฟังก์ชัน updateField(row, field, value) ใน Apps Script
-    //   เพื่อให้การแก้ไขในตาราง (เหมือน Excel) บันทึกลงชีตได้ทันที
+    function escapeHtml(s){
+      return String(s ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#039;');
+    }
+    function escapeAttr(s){ return escapeHtml(s); }
   </script>
+
 </body>
 </html>
