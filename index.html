@@ -1,10 +1,15 @@
+/*******************************************************
+ * SMART MATCH PRO (2026) - PROFESSIONAL INTERNAL TRACKER
+ * Database ID: 1Eg6LMeH9JJeRYpwtCMUz-GrHfG3pBLcpMiuYuPEx5do
+ *******************************************************/
+
 const SPREADSHEET_ID = "1Eg6LMeH9JJeRYpwtCMUz-GrHfG3pBLcpMiuYuPEx5do"; 
 const SHEET_NAME = "listings";
 
 function doGet() {
   return HtmlService.createTemplateFromFile('Index')
     .evaluate()
-    .setTitle('Smart Match PRO | Internal Tracker')
+    .setTitle('Smart Match PRO | Tracker')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
 }
 
@@ -16,12 +21,24 @@ function getSmartData() {
     const data = sheet.getDataRange().getValues();
     if (data.length < 2) return []; 
     const headers = data.shift();
-    return data.reverse().map(r => {
-      let obj = {};
+    return data.reverse().map((r, idx) => {
+      let obj = { _row: data.length - idx + 1 }; // เก็บตำแหน่งแถวจริงไว้แก้ไข
       headers.forEach((h, i) => obj[h] = r[i]);
       return obj;
     });
   } catch (e) { return { error: e.toString() }; }
+}
+
+// อัปเดตสถานะ Workflow (คลิกที่ไอคอนแล้วเปลี่ยนค่าใน Sheet ทันที)
+function toggleStep(row, colName) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const colIndex = headers.indexOf(colName) + 1;
+  const currentVal = sheet.getRange(row, colIndex).getValue();
+  const newVal = (currentVal === "Done" || currentVal === "yes") ? "No" : "Done";
+  sheet.getRange(row, colIndex).setValue(newVal);
+  return { ok: true, newVal: newVal };
 }
 
 // บันทึกข้อมูลใหม่พร้อมรัน ID อัตโนมัติ
@@ -36,7 +53,6 @@ function saveNewListing(formData) {
       nextNum = parseInt(String(lastId).replace("SM-", "")) + 1;
     }
     const newId = "SM-" + String(nextNum).padStart(3, '0');
-
     const newRow = [
       newId, formData.Source_URL, formData.Price, formData.Bedrooms,
       formData.Zone, formData.Type, "No", "No", "No", "No", formData.Notes
