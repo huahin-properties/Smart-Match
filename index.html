@@ -1,63 +1,197 @@
-/*******************************************************
- * SMART MATCH PRO (2026) - PROFESSIONAL INTERNAL TRACKER
- * Database ID: 1Eg6LMeH9JJeRYpwtCMUz-GrHfG3pBLcpMiuYuPEx5do
- *******************************************************/
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy: #0B1829; --gold: #C9A84C; --bg: #F0F3F5; --white: #FFFFFF; --border: #E1E8ED; --red: #B12A3B; --green: #28A745; }
+    
+    /* scaling for LINE */
+    body.is-line { zoom: 0.9; -moz-transform: scale(0.9); -moz-transform-origin: 0 0; }
 
-const SPREADSHEET_ID = "1Eg6LMeH9JJeRYpwtCMUz-GrHfG3pBLcpMiuYuPEx5do"; 
-const SHEET_NAME = "listings";
+    body { font-family: 'Montserrat', 'Sarabun', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--navy); overflow-x: hidden; }
+    
+    .header { background: var(--navy); color: var(--white); padding: 12px; text-align: center; border-bottom: 3px solid var(--gold); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .header h1 { margin: 0; font-size: 16px; letter-spacing: 1px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    
+    .search-panel { background: var(--white); padding: 10px; border-bottom: 1px solid var(--border); }
+    .input-box { width: 100%; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; margin-bottom: 6px; font-family: 'Sarabun'; }
+    .filter-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 6px; margin-bottom: 6px; }
+    select { padding: 10px; border-radius: 8px; border: 1.5px solid var(--border); font-family: 'Sarabun'; font-size: 14px; outline: none; }
 
-function doGet() {
-  return HtmlService.createTemplateFromFile('Index')
-    .evaluate()
-    .setTitle('Smart Match PRO | Tracker')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-}
+    .pill-box { display: flex; gap: 5px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
+    .pill { white-space: nowrap; padding: 6px 12px; border-radius: 20px; background: #E1E8ED; font-size: 10px; font-weight: 800; color: #555; cursor: pointer; border: none; }
+    .pill.active { background: var(--gold); color: white; }
 
-// ดึงข้อมูลและเรียงลำดับใหม่ล่าสุดขึ้นก่อน
-function getSmartData() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName(SHEET_NAME);
-    const data = sheet.getDataRange().getValues();
-    if (data.length < 2) return []; 
-    const headers = data.shift();
-    return data.reverse().map((r, idx) => {
-      let obj = { _row: data.length - idx + 1 }; // เก็บตำแหน่งแถวจริงไว้แก้ไข
-      headers.forEach((h, i) => obj[h] = r[i]);
-      return obj;
-    });
-  } catch (e) { return { error: e.toString() }; }
-}
+    /* ✅ Slim Row Design - แสดงข้อมูลได้มากที่สุด */
+    .list-area { padding: 5px 8px 100px; }
+    .row-card { background: var(--white); border-radius: 8px; margin-bottom: 4px; padding: 8px 12px; display: flex; align-items: center; border: 1px solid var(--border); gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
 
-// อัปเดตสถานะ Workflow (คลิกที่ไอคอนแล้วเปลี่ยนค่าใน Sheet ทันที)
-function toggleStep(row, colName) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const colIndex = headers.indexOf(colName) + 1;
-  const currentVal = sheet.getRange(row, colIndex).getValue();
-  const newVal = (currentVal === "Done" || currentVal === "yes") ? "No" : "Done";
-  sheet.getRange(row, colIndex).setValue(newVal);
-  return { ok: true, newVal: newVal };
-}
+    .info-col { flex: 1; min-width: 0; }
+    .row-id { font-size: 9px; font-weight: 800; color: var(--gold); text-transform: uppercase; }
+    .row-zone { font-size: 14px; font-weight: 700; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .row-sub { font-size: 11px; color: #777; font-family: 'Sarabun'; }
 
-// บันทึกข้อมูลใหม่พร้อมรัน ID อัตโนมัติ
-function saveNewListing(formData) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName(SHEET_NAME);
-    const lastRow = sheet.getLastRow();
-    let nextNum = 1;
-    if (lastRow > 1) {
-      const lastId = sheet.getRange(lastRow, 1).getValue();
-      nextNum = parseInt(String(lastId).replace("SM-", "")) + 1;
+    .price-col { flex-shrink: 0; text-align: right; border-left: 1px solid #eee; padding-left: 10px; }
+    .row-price { font-size: 15px; font-weight: 800; color: var(--red); display: block; }
+    
+    /* Interactive Workflow Icons - คลิกเปลี่ยนสถานะได้จริง */
+    .workflow-strip { display: flex; gap: 8px; margin-top: 5px; }
+    .step-icon { width: 30px; height: 30px; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; background: #F8F9FA; border: 1px solid #eee; transition: 0.2s; cursor: pointer; }
+    .icon-label { font-size: 6px; font-weight: 800; color: #aaa; text-transform: uppercase; margin-top: 1px; }
+    .step-done { border-color: var(--green); background: #E6F4EA; color: var(--green); }
+    .step-pending { border-color: #eee; color: #ddd; }
+
+    /* FAB & Modal */
+    .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--gold); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: none; z-index: 99; }
+    #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 15px; }
+    .modal-box { background: white; padding: 20px; border-radius: 12px; max-width: 450px; margin: auto; }
+    .btn-save { background: var(--gold); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>SMART MATCH PRO <span onclick="location.reload()" style="cursor:pointer; font-size:12px; color:var(--gold);">↻</span></h1>
+  </div>
+
+  <div class="search-panel">
+    <input type="text" id="qSearch" class="input-box" placeholder="Search (Zone, ID, Notes...)" oninput="filterData()">
+    <div class="filter-grid">
+      <select id="sortPrice" onchange="filterData()">
+        <option value="">Sort Price</option>
+        <option value="low">Price: Low to High</option>
+        <option value="high">Price: High to Low</option>
+      </select>
+      <input type="number" id="bedSearch" class="input-box" placeholder="Beds" oninput="filterData()" style="margin:0;">
+    </div>
+    <div class="pill-box" id="pillBox">
+      <button class="pill active" data-f="all">ALL</button>
+      <button class="pill" data-f="House">HOUSE</button>
+      <button class="pill" data-f="Condo">CONDO</button>
+      <button class="pill" data-f="Pool Villa">POOL VILLA</button>
+      <button class="pill" data-f="Land">LAND</button>
+      <button class="pill" data-f="Commercial">COMMERCIAL</button>
+      <button class="pill" data-f="Others">OTHERS</button>
+    </div>
+  </div>
+
+  <div id="loading" style="text-align: center; padding: 30px; color: #999; font-weight: 700; font-size:12px;">SYNCHRONIZING DATABASE...</div>
+  <div class="list-area" id="listContent"></div>
+
+  <div id="modal">
+    <div class="modal-box">
+      <h2 style="margin:0 0 12px; font-size:18px;">ADD NEW RECORD</h2>
+      <form id="addForm">
+        <input type="url" name="Source_URL" placeholder="Listing URL (https://...)" required class="input-box">
+        <div style="display:flex; gap:6px;">
+          <input type="number" name="Price" placeholder="Price" required class="input-box">
+          <input type="number" name="Bedrooms" placeholder="Beds" required class="input-box">
+        </div>
+        <input type="text" name="Zone" placeholder="Zone (e.g. Bor Fai)" required class="input-box">
+        <select name="Type" class="input-box" style="margin-bottom:8px;">
+          <option value="House">House</option>
+          <option value="Condo">Condo</option>
+          <option value="Pool Villa">Pool Villa</option>
+          <option value="Land">Land</option>
+          <option value="Commercial">Commercial</option>
+          <option value="Others">Others</option>
+        </select>
+        <textarea name="Notes" placeholder="Internal Notes..." class="input-box" rows="2"></textarea>
+        <button type="submit" class="btn-save" id="saveBtn">SAVE TO DATABASE</button>
+        <button type="button" onclick="toggleModal()" style="background:none; border:none; color:#999; width:100%; margin-top:10px; font-weight:700;">CANCEL</button>
+      </form>
+    </div>
+  </div>
+
+  <button class="fab" onclick="toggleModal()">+</button>
+
+  <script>
+    let masterData = [];
+
+    window.onload = () => {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      if (ua.indexOf("Line") > -1) document.body.classList.add('is-line');
+      fetchData();
+    };
+
+    function fetchData() {
+      google.script.run.withSuccessHandler(data => {
+        if(data.error) { alert(data.error); return; }
+        masterData = data;
+        document.getElementById('loading').style.display = 'none';
+        render(masterData);
+      }).getSmartData();
     }
-    const newId = "SM-" + String(nextNum).padStart(3, '0');
-    const newRow = [
-      newId, formData.Source_URL, formData.Price, formData.Bedrooms,
-      formData.Zone, formData.Type, "No", "No", "No", "No", formData.Notes
-    ];
-    sheet.appendRow(newRow);
-    return { ok: true, id: newId };
-  } catch (e) { return { ok: false, error: e.toString() }; }
-}
+
+    function render(items) {
+      const container = document.getElementById('listContent');
+      if (items.length === 0) { container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">NO RESULTS</div>'; return; }
+      
+      container.innerHTML = items.map(item => `
+        <div class="row-card">
+          <div class="info-col" onclick="window.open('${item.Source_URL}', '_blank')">
+            <span class="row-id">#${item.ID} • ${item.Type}</span>
+            <span class="row-zone">${item.Zone}</span>
+            <span class="row-sub">${item.Bedrooms} Beds • ${item.Notes || '-'}</span>
+            <div class="workflow-strip">
+              <div class="step-icon ${isDone(item.Step1_Talk)}" onclick="event.stopPropagation(); updateStatus(${item._row}, 'Step1_Talk')"><span>✔</span><span class="icon-label">Talk</span></div>
+              <div class="step-icon ${isDone(item.Step2_Survey)}" onclick="event.stopPropagation(); updateStatus(${item._row}, 'Step2_Survey')"><span>📸</span><span class="icon-label">Survey</span></div>
+              <div class="step-icon ${isDone(item.Step3_Post)}" onclick="event.stopPropagation(); updateStatus(${item._row}, 'Step3_Post')"><span>🌐</span><span class="icon-label">Post</span></div>
+              <div class="step-icon ${isDone(item.Step4_Other)}" onclick="event.stopPropagation(); updateStatus(${item._row}, 'Step4_Other')"><span>🏆</span><span class="icon-label">Done</span></div>
+            </div>
+          </div>
+          <div class="price-col">
+            <span class="row-price">฿${(item.Price/1000000).toFixed(1)}M</span>
+            <small style="color:#aaa; font-size:9px;">${Number(item.Price).toLocaleString()}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function isDone(v) { return (String(v).toLowerCase().trim() === 'done') ? 'step-done' : 'step-pending'; }
+
+    function updateStatus(row, col) {
+      google.script.run.withSuccessHandler(res => { if(res.ok) fetchData(); }).toggleStep(row, col);
+    }
+
+    function filterData() {
+      const q = document.getElementById('qSearch').value.toLowerCase();
+      const sort = document.getElementById('sortPrice').value;
+      const beds = document.getElementById('bedSearch').value;
+      const activePill = document.querySelector('.pill.active').dataset.f;
+      let filtered = masterData.filter(p => {
+        const textMatch = `${p.Zone} ${p.ID} ${p.Notes} ${p.Type}`.toLowerCase().includes(q);
+        const bedMatch = beds === "" || p.Bedrooms == beds;
+        const typeMatch = activePill === "all" || String(p.Type).trim() === activePill;
+        return textMatch && bedMatch && typeMatch;
+      });
+      if (sort === "low") filtered.sort((a, b) => a.Price - b.Price);
+      if (sort === "high") filtered.sort((a, b) => b.Price - a.Price);
+      render(filtered);
+    }
+
+    function toggleModal() {
+      const m = document.getElementById('modal');
+      m.style.display = m.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.getElementById('addForm').onsubmit = (e) => {
+      e.preventDefault();
+      document.getElementById('saveBtn').innerText = "SAVING...";
+      const fd = Object.fromEntries(new FormData(e.target));
+      google.script.run.withSuccessHandler(res => {
+        if(res.ok) { toggleModal(); e.target.reset(); document.getElementById('saveBtn').innerText = "SAVE LISTING"; fetchData(); }
+      }).saveNewListing(fd);
+    };
+
+    document.getElementById('pillBox').addEventListener('click', (e) => {
+      if (e.target.classList.contains('pill')) {
+        document.querySelectorAll('.pill').forEach(el => el.classList.remove('active'));
+        e.target.classList.add('active');
+        filterData();
+      }
+    });
+  </script>
+</body>
+</html>
